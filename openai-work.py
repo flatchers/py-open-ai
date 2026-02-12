@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from openai import OpenAI
 
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -16,28 +17,39 @@ OPENAI_SECRET_KEY = os.getenv("OPENAI_SECRET_KEY")
 client = OpenAI(api_key=OPENAI_SECRET_KEY)
 
 
-@app.get("/")
-def root(request: str):
-    if request.lower() in {"exit", "quit"}:
+class Prompt(BaseModel):
+    request: str
+
+
+@app.post("/prompt")
+def main_prompt(prompt: Prompt):
+
+    if prompt.request.lower() in {"exit", "quit"}:
         return {"message": "Session ended."}
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a strict assistant. Return **only valid JSON**. "
+                "Do not include any explanations, notes, headings, or Markdown blocks. "
+                "The JSON must contain exactly what the user requests, no extra fields."
+                "Example: {ChatGPT: {The Earth's rotation is gradually slowing down, "
+                "resulting in the length of a day increasing by approximately 1.7 milliseconds per century.}"
+            )},
+        {
+            "role": "user",
+            "content": prompt.request
+        }
+    ]
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[{"role": "user", "content": request}]
+        messages=messages
     )
     answer = response.choices[0].message.content
-    return {"ChatGPT": answer}
-
-
-# while True:
-#
-#     user_input = input("You: ")
-#     if user_input.lower() in {"exit", "quit"}:
-#         break
-#
-#     response = client.chat.completions.create(
-#         model="gpt-4o-mini",
-#         messages=[{"role": "user", "content": user_input}]
-#     )
-#
-#     print("ChatGPT:", response.choices[0].message.content)
+    try:
+        data = json.loads(answer)
+        return {"ChatGPT": data}
+    except json.JSONDecodeError:
+        return {"error": "Response is not valid JSON", "raw_text": answer}
