@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-from models import Storage # noqa
+from models import StorageModel, ChatSessionModel # noqa
 from database import Base
 from settings import settings
 
