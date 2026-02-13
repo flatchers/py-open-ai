@@ -3,11 +3,11 @@ A simple backend on **FastAPI** for communicating with AI, storing chat history,
 
 ## 📦 Project structure
 py-open-ai/
-+ main.py # FastAPI endpoints
++ openai-work.py # FastAPI endpoints
 + models.py # SQLAlchemy models
 + database.py # Async DB sessions
-+ utils.py # token counting
-+ migrations/ # Alembic migrations
++ tokenizer.py # token counting
++ alembic/ # Alembic migrations
 + requirements.txt
 + README.md
 + .env # Environment variables (hidden)
@@ -24,3 +24,4 @@ pip install -r requirements.txt
 alembic upgrade head
 
 uvicorn openai-work:app
+
