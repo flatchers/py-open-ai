@@ -18,12 +18,6 @@ POSTGRESQL_DATABASE_URL = (
     f"{settings.POSTGRES_DB}"
 )
 
-print(settings.POSTGRES_HOST)
-print(settings.POSTGRES_PORT)
-print(settings.POSTGRES_USER)
-print(settings.POSTGRES_PASSWORD)
-print(settings.POSTGRES_DB)
-
 postgresql_engine = create_async_engine(POSTGRESQL_DATABASE_URL, echo=False)
 AsyncPostgresqlSessionLocal = sessionmaker(  # type: ignore
     bind=postgresql_engine,
