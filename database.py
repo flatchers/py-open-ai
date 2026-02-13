@@ -7,24 +7,41 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from settings import settings
 
 Base = declarative_base()
+
 connect_args = {"check_same_thread": False}
 pool = None
-
-engine = create_async_engine(
-    settings.db_url, connect_args=connect_args, poolclass=pool, echo=False
+POSTGRESQL_DATABASE_URL = (
+    f"postgresql+asyncpg://{settings.POSTGRES_USER}:"
+    f"{settings.POSTGRES_PASSWORD}@"
+    f"{settings.POSTGRES_HOST}:"
+    f"{settings.POSTGRES_PORT}/"
+    f"{settings.POSTGRES_DB}"
 )
-AsyncSQLiteSessionLocal = sessionmaker(  # type: ignore
-    bind=engine, class_=AsyncSession, expire_on_commit=False
+
+print(settings.POSTGRES_HOST)
+print(settings.POSTGRES_PORT)
+print(settings.POSTGRES_USER)
+print(settings.POSTGRES_PASSWORD)
+print(settings.POSTGRES_DB)
+
+postgresql_engine = create_async_engine(POSTGRESQL_DATABASE_URL, echo=False)
+AsyncPostgresqlSessionLocal = sessionmaker(  # type: ignore
+    bind=postgresql_engine,
+    class_=AsyncSession,
+    autocommit=False,
+    autoflush=False,
+    expire_on_commit=False,
 )
 
 
-async def get_db():
-    async with AsyncSQLiteSessionLocal() as session:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """
+    Provide an asynchronous database session.
+
+    This function returns an async generator yielding a new database session.
+    It ensures that the session is properly closed after use.
+
+    :return: An asynchronous generator yielding an AsyncSession instance.
+    """
+    async with AsyncPostgresqlSessionLocal() as session:
         yield session
-
-
-async def reset_sqlite_database() -> None:
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)

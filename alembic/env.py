@@ -8,8 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 from models import StorageModel, ChatSessionModel # noqa
-from database import Base
-from settings import settings
+from database import Base, POSTGRESQL_DATABASE_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -21,7 +20,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 
-config.set_main_option("sqlalchemy.url", settings.db_url)
+config.set_main_option("sqlalchemy.url", POSTGRESQL_DATABASE_URL)
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
