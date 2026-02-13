@@ -13,6 +13,7 @@ from sqlalchemy.orm import joinedload
 from database import get_db
 from models import StorageModel, ChatSessionModel
 from schemas import ChatSchema
+from settings import settings
 from tokenizer import num_tokens_from_string
 
 app = FastAPI()
@@ -20,9 +21,7 @@ app = FastAPI()
 
 load_dotenv()
 
-OPENAI_SECRET_KEY = os.getenv("OPENAI_SECRET_KEY")
-
-client = AsyncOpenAI(api_key=OPENAI_SECRET_KEY)
+client = AsyncOpenAI(api_key=settings.OPENAI_SECRET_KEY)
 
 
 @app.post("/chat/start")
