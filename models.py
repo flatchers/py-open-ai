@@ -1,10 +1,9 @@
 from decimal import Decimal
 
-from sqlalchemy import Text, Integer, DateTime, ForeignKey, JSON, Numeric
+from sqlalchemy import Text, Integer, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
-from tokenizer import num_tokens_from_string
 
 
 class ChatSessionModel(Base):
