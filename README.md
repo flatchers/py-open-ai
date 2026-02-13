@@ -7,10 +7,13 @@ py-open-ai/
 + models.py # SQLAlchemy models
 + database.py # Async DB sessions
 + tokenizer.py # token counting
++ schemas.py # pydantic models
 + alembic/ # Alembic migrations
++ settings.py # Environment variables
 + requirements.txt
 + README.md
 + .env # Environment variables (hidden)
++ .gitignore # not visible on GitHub
 
 ```bash
 git clone https://github.com/flatchers/py-open-ai.git
@@ -24,4 +27,5 @@ pip install -r requirements.txt
 alembic upgrade head
 
 uvicorn openai-work:app
+
 
