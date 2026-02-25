@@ -3,7 +3,7 @@ from decimal import Decimal
 from sqlalchemy import Text, Integer, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database import Base
+from app.db.base import Base
 
 
 class ChatSessionModel(Base):

@@ -1,12 +1,10 @@
 from typing import AsyncGenerator
 
-from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
-from settings import settings
+from app.core.config import settings
 
-Base = declarative_base()
 
 connect_args = {"check_same_thread": False}
 pool = None

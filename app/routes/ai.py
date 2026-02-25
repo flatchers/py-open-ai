@@ -2,29 +2,30 @@ import json
 import os
 from decimal import Decimal
 
-from fastapi import FastAPI, Depends
+from fastapi import Depends, APIRouter, HTTPException
 from openai import AsyncOpenAI
 
 from dotenv import load_dotenv
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
+from starlette import status
 
-from database import get_db
-from models import StorageModel, ChatSessionModel
-from schemas import ChatSchema
-from settings import settings
-from tokenizer import num_tokens_from_string
-
-app = FastAPI()
+from app.db.session import get_db
+from app.models.chat import StorageModel, ChatSessionModel
+from app.schemas.chat import ChatSchema
+from app.core.config import settings
+from app.core.tokenizer import num_tokens_from_string
 
 
 load_dotenv()
 
 client = AsyncOpenAI(api_key=settings.OPENAI_SECRET_KEY)
 
+router = APIRouter()
 
-@app.post("/chat/start")
+
+@router.post("/start")
 async def start_chat_session(async_db: AsyncSession = Depends(get_db)):
     new_chat = ChatSessionModel()
     async_db.add(new_chat)
@@ -33,11 +34,15 @@ async def start_chat_session(async_db: AsyncSession = Depends(get_db)):
     return new_chat
 
 
-@app.post("/chat/prompt")
+@router.post("/prompt")
 async def main_prompt(
         data: ChatSchema,
         async_db: AsyncSession = Depends(get_db)
 ):
+
+    """
+    Send user prompt to the LLM endpoint and return the model's response.
+    """
 
     if data.request.lower() in {"exit", "quit"}:
         return {"message": "Session ended."}
@@ -76,12 +81,20 @@ async def main_prompt(
         result = await async_db.execute(stmt)
         session = result.scalars().first()
 
+        if not session:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Chosen session doesn't exists.",
+            )
+
         request_price = Decimal("0.15")
         response_price = Decimal("0.60")
 
         for storage in session.storages:
             if data.request == storage.request:
                 request_price = Decimal("0.075")
+            else:
+                request_price = Decimal("0.15")
 
         new_data = json.loads(answer)
         new_storage = StorageModel(
@@ -114,7 +127,7 @@ async def main_prompt(
         return {"error": "Response is not valid JSON", "raw_text": answer}
 
 
-@app.post("/chat/history/{session_id}")
+@router.get("/history/{session_id}")
 async def show_session_history(session_id: int, async_db: AsyncSession = Depends(get_db)):
     stmt = (
         select(ChatSessionModel)

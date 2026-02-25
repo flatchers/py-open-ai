@@ -6,9 +6,9 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-
-from models import StorageModel, ChatSessionModel # noqa
-from database import Base, POSTGRESQL_DATABASE_URL
+from app.models.chat import StorageModel, ChatSessionModel # noqa
+from app.db.session import POSTGRESQL_DATABASE_URL
+from app.db.base import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
