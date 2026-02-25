@@ -114,7 +114,7 @@ async def main_prompt(
         return {"error": "Response is not valid JSON", "raw_text": answer}
 
 
-@app.post("/chat/history/{session_id}")
+@app.get("/chat/history/{session_id}")
 async def show_session_history(session_id: int, async_db: AsyncSession = Depends(get_db)):
     stmt = (
         select(ChatSessionModel)
